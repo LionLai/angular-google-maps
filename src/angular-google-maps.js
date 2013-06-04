@@ -48,7 +48,7 @@
    * Create the model in a self-contained class where map-specific logic is 
    * done. This model will be used in the directive.
    */
-  
+  var geocoder = new google.maps.Geocoder();
   var MapModel = (function () {
     
     var _defaults = { 
@@ -76,6 +76,7 @@
       this.dragging = false;
       this.selector = o.container;
       this.markers = [];
+      this.address = o.address;
       this.options = o.options;
       
       this.draw = function () {
@@ -95,6 +96,10 @@
             draggable: that.draggable,
             mapTypeId : google.maps.MapTypeId.ROADMAP
           }));
+
+          if (this.address) {
+              this.findAddress(this.address);
+          }
           
           google.maps.event.addListener(_instance, "dragstart",
               
@@ -258,6 +263,21 @@
         return -1;
       };
       
+      this.findAddress = function (address) {
+          var me = this;
+          geocoder.geocode({ 'address': address }, function (results, status) {
+              if (status == google.maps.GeocoderStatus.OK) {
+                  if (results[0].types[0] != "street_address") {
+                      //the result address type 
+                      //alert("Please enter more detailed");
+                  }
+                  _instance.setCenter(results[0].geometry.location);
+                  me.removeMarkers(_markers);
+                  me.addMarker(results[0].geometry.location.jb, results[0].geometry.location.kb);
+              }
+          });
+      };
+
       this.addInfoWindow = function (lat, lng, html) {
         var win = new google.maps.InfoWindow({
           content: html,
@@ -336,6 +356,7 @@
         latitude: "=latitude", // required
         longitude: "=longitude", // required
         zoom: "=zoom", // required
+        address: "=address", // optional
         refresh: "&refresh", // optional
         windows: "=windows", // optional
         events: "=events"
@@ -542,6 +563,16 @@
           
           _m.zoom = newValue;
           _m.draw();
+        });
+
+        scope.$watch("address", function (newValue, oldValue) {
+          if (newValue === oldValue) {
+              return;
+          }
+          if (geocoder) {
+              _m.findAddress(newValue);
+              _m.draw();
+          }
         });
       }
     };

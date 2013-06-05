@@ -54,6 +54,9 @@
     var _defaults = { 
         zoom: 8,
         draggable: false,
+        zoomControl: true,
+        scrollwheel: true,
+        disableDoubleClickZoom: false,
         container: null
       };
     
@@ -73,6 +76,9 @@
       this.center = opts.center;
       this.zoom = o.zoom;
       this.draggable = o.draggable;
+      this.scrollwheel = o.scrollwheel;
+      this.zoomControl = o.zoomControl;
+      this.disableDoubleClickZoom = o.disableDoubleClickZoom;
       this.dragging = false;
       this.selector = o.container;
       this.markers = [];
@@ -94,11 +100,14 @@
             center: that.center,
             zoom: that.zoom,
             draggable: that.draggable,
+            zoomControl : that.zoomControl,
+            disableDoubleClickZoom : that.disableDoubleClickZoom,
+            scrollwheel : that.scrollwheel,
             mapTypeId : google.maps.MapTypeId.ROADMAP
           }));
 
-          if (this.address) {
-              this.findAddress(this.address);
+          if (that.address) {
+              that.findAddress(that.address);
           }
           
           google.maps.event.addListener(_instance, "dragstart",
@@ -356,6 +365,7 @@
         latitude: "=latitude", // required
         longitude: "=longitude", // required
         zoom: "=zoom", // required
+        zoomControl: "=zoomControl", // optional
         address: "=address", // optional
         refresh: "&refresh", // optional
         windows: "=windows", // optional
@@ -392,6 +402,9 @@
           container: element[0],            
           center: new google.maps.LatLng(scope.center.latitude, scope.center.longitude),              
           draggable: attrs.draggable == "true",
+          zoomControl: attrs.zoomcontrol == "true",
+          scrollwheel: attrs.scrollwheel == "true",
+          disableDoubleClickZoom: attrs.disabledoubleclickzoom == "true",
           zoom: scope.zoom
         }));       
       
